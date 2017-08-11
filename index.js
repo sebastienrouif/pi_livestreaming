@@ -9,7 +9,7 @@ var spawn = require('child_process').spawn;
 var proc;
 
 app.use('/', express.static(path.join(__dirname, 'stream')));
-
+app.use('/static', express.static(path.join(__dirname, 'static')));
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
