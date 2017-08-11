@@ -69,8 +69,13 @@ function takePicture(io) {
     console.log('emit picture');
     io.sockets.emit('picture', 'image_stream.jpg?_t=' + (Math.random() * 100000));
     app.set('watchingFile', false);
+    setTimeout(reset,5000, io);
   })
+}
 
+function reset(io) {
+  console.log('emit reset ');
+  io.sockets.emit('reset');
 }
 
 function countdown(io, count) {
@@ -78,8 +83,9 @@ function countdown(io, count) {
   io.sockets.emit('countDown', count);
   if (count == 0) {
     takePicture(io);
+  } else {
+    setTimeout(countdown,1000, io, count -1);
   }
-  setTimeout(countdown,1000, io, count -1);
 }
 
 

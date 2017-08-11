@@ -26,12 +26,20 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
   var socket = io();
-  socket.on('picture', function(url) {
-    $('#picture').attr('src', url);
-  });
 
   socket.on('countDown', function(count) {
     $('#countDown').text(count);
+  });
+
+  socket.on('picture', function(url) {
+    $('#picture').attr('src', url);
+    $('#picture').show();
+  });
+
+  socket.on('reset', function() {
+    $('#picture').hide();
+    $('#countDown').text('?');
+    $('#countDown').show();
   });
 
   function takePictures() {
