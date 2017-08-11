@@ -2,11 +2,13 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var fs = require('fs');
 var path = require('path');
-
-var spawn = require('child_process').spawn;
-var proc;
+const Raspistill = require('node-raspistill').Raspistill;
+const camera = new Raspistill({
+    fileName: './stream/image_stream.jpg',
+    width: 640,
+    height: 480
+});
 
 app.use('/', express.static(path.join(__dirname, 'stream')));
 app.use('/static', express.static(path.join(__dirname, 'static')));
@@ -24,13 +26,6 @@ io.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
     delete sockets[socket.id];
-
-    // no more sockets, kill the stream
-    if (Object.keys(sockets).length == 0) {
-      app.set('watchingFile', false);
-      if (proc) proc.kill();
-      fs.unwatchFile('./stream/image_stream.jpg');
-    }
   });
 
   socket.on('start-takePictures', function() {
@@ -45,32 +40,21 @@ http.listen(3000, function() {
 
 function stopStreaming() {
   if (Object.keys(sockets).length == 0) {
-    app.set('watchingFile', false);
-    if (proc) proc.kill();
-    fs.unwatchFile('./stream/image_stream.jpg');
   }
 }
 
 function takePicture(io) {
-
-  if (app.get('watchingFile')) {
-    io.sockets.emit('picture', 'image_stream.jpg?_t=' + (Math.random() * 100000));
-    return;
-  }
-
-  var args = ["-w", "640", "-h", "480", "-o", "./stream/image_stream.jpg"];
-  proc = spawn('raspistill', args);
-
-  console.log('Watching for changes...');
-
-  app.set('watchingFile', true);
-
-  fs.watchFile('./stream/image_stream.jpg', function(current, previous) {
-    console.log('emit picture');
-    io.sockets.emit('picture', 'image_stream.jpg?_t=' + (Math.random() * 100000));
-    app.set('watchingFile', false);
-    setTimeout(reset,5000, io);
-  })
+  console.log('taking Picture...');
+  camera.takePhoto()
+    .then((photo) => {
+      console.log('Emit picture');
+      io.sockets.emit('picture', 'image_stream.jpg?_t=' + (Math.random() * 100000));
+      setTimeout(reset,5000, io);
+    })
+    .catch((err) => {
+        console.log('probably stopped, checking error');
+        console.log(err instanceof RaspistillInterruptError); // true, raspistill was interrupted;
+    });
 }
 
 function reset(io) {
