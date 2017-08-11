@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Stream My Aquarium</title>
+  <title>Photobooth</title>
 
   <!-- Bootstrap CSS -->
   <link href="static/bootstrap.min.css" rel="stylesheet">
@@ -26,29 +26,34 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
   var socket = io();
-  socket.on('liveStream', function(url) {
-    $('#stream').attr('src', url);
-    $('.start').hide();
+  socket.on('picture', function(url) {
+    $('#picture').attr('src', url);
   });
 
-  function startStream() {
-    socket.emit('start-stream');
-    $('.start').hide();
+  socket.on('countDown', function(count) {
+    $('#countDown').text(count);
+  });
+
+  function takePictures() {
+    socket.emit('start-takePictures');
+     $('#countDown').text('???');
   }
   </script>
 </head>
 
 <body class="container">
-  <h1 class="text-center">My Aquarium
+  <h1 class="text-center">Photobooth
     <small>Powered by PI</small>
   </h1>
 
   <hr>
 
-  <button type="button" id="" class="btn btn-info start" onclick="startStream()">Start Camera</button>
+  <button type="button" id="" class="btn btn-info start" onclick="takePictures()">Take pictures</button>
+
+  <button type="button" id="countDown" class="btn btn-info">?</button>
 
   <div class="row">
-    <img src="" id="stream">
+    <img src="" id="picture">
   </div>
 
 </body>

@@ -33,8 +33,8 @@ io.on('connection', function(socket) {
     }
   });
 
-  socket.on('start-stream', function() {
-    startStreaming(io);
+  socket.on('start-takePictures', function() {
+    countdown(io, 5); //5 sec countdown
   });
 
 });
@@ -51,14 +51,14 @@ function stopStreaming() {
   }
 }
 
-function startStreaming(io) {
+function takePicture(io) {
 
   if (app.get('watchingFile')) {
-    io.sockets.emit('liveStream', 'image_stream.jpg?_t=' + (Math.random() * 100000));
+    io.sockets.emit('picture', 'image_stream.jpg?_t=' + (Math.random() * 100000));
     return;
   }
 
-  var args = ["-w", "640", "-h", "480", "-o", "./stream/image_stream.jpg", "-t", "999999999", "-tl", "100"];
+  var args = ["-w", "640", "-h", "480", "-o", "./stream/image_stream.jpg"];
   proc = spawn('raspistill', args);
 
   console.log('Watching for changes...');
@@ -66,7 +66,20 @@ function startStreaming(io) {
   app.set('watchingFile', true);
 
   fs.watchFile('./stream/image_stream.jpg', function(current, previous) {
-    io.sockets.emit('liveStream', 'image_stream.jpg?_t=' + (Math.random() * 100000));
+    console.log('emit picture');
+    io.sockets.emit('picture', 'image_stream.jpg?_t=' + (Math.random() * 100000));
+    app.set('watchingFile', false);
   })
 
 }
+
+function countdown(io, count) {
+  io.sockets.emit('countDown', countdown);
+  if (count == 0) {
+    takePicture(io);
+  }
+  setTimeout(countdown - 1, 1000);
+}
+
+
+
