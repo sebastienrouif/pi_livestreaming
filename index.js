@@ -74,7 +74,8 @@ function takePicture(io) {
 }
 
 function countdown(io, count) {
-  io.sockets.emit('countDown', countdown);
+  console.log('emit countDown ' + count);
+  io.sockets.emit('countDown', count);
   if (count == 0) {
     takePicture(io);
   }
