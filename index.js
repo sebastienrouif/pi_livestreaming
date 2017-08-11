@@ -79,7 +79,7 @@ function countdown(io, count) {
   if (count == 0) {
     takePicture(io);
   }
-  setTimeout(countdown - 1, 1000);
+  setTimeout(countdown,1000, io, count -1);
 }
 
 
