@@ -3,9 +3,11 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var path = require('path');
-const Raspistill = require('node-raspistill').Raspistill;
-const camera = new Raspistill({
-    fileName: './stream/image_stream.jpg',
+var Raspistill = require('node-raspistill').Raspistill;
+var camera = new Raspistill({
+    outputDir: './stream/',
+    fileName: 'image_stream.jpg',
+    encoding: 'jpg',
     width: 640,
     height: 480
 });
