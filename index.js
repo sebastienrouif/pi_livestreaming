@@ -15,6 +15,9 @@ var camera = new Raspistill({
 var gphoto2 = require('gphoto2');
 var GPhoto = new gphoto2.GPhoto2();
 var fs = require('fs');
+var Gpio = require('onoff').Gpio,
+  led = new Gpio(16, 'out'),
+  button = new Gpio(21, 'in', 'both');
 
 app.use('/', express.static(path.join(__dirname, 'stream')));
 app.use('/static', express.static(path.join(__dirname, 'static')));
@@ -78,6 +81,10 @@ function countdown(io, count) {
     setTimeout(countdown,1000, io, count -1);
   }
 }
+
+button.watch(function(err, value) {
+  led.writeSync(value);
+});
 
 function testgPhoto() {
 console.log('testing gPhoto');
