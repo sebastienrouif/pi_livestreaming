@@ -18,6 +18,16 @@ var fs = require('fs');
 var Gpio = require('onoff').Gpio,
   led = new Gpio(16, 'out'),
   button = new Gpio(21, 'in', 'both');
+console.log('init camera');
+var dslr;
+GPhoto.list(function (list) {
+  console.log('list length ' + list.length);
+  if (list.length === 0) return;
+  dslr = list[0];
+  console.log('Found', dslr.model);
+});
+var spawn = require('child_process').spawn;
+var proc;
 
 app.use('/', express.static(path.join(__dirname, 'stream')));
 app.use('/static', express.static(path.join(__dirname, 'static')));
@@ -27,19 +37,19 @@ app.get('/', function(req, res) {
 });
 
 var sockets = {};
+var isTakingPicture = false;
 
 io.on('connection', function(socket) {
 
   sockets[socket.id] = socket;
   console.log("Total clients connected : ", Object.keys(sockets).length);
-  testgPhoto();
 
   socket.on('disconnect', function() {
     delete sockets[socket.id];
   });
 
   socket.on('start-takePictures', function() {
-    countdown(io, 5); //5 sec countdown
+    countdown(io, 3);
   });
 
 });
@@ -57,14 +67,18 @@ function takePicture(io) {
   console.log('taking Picture...');
   camera.takePhoto()
     .then((photo) => {
-      console.log('Emit picture');
-      io.sockets.emit('picture', 'image_stream.jpg?_t=' + (Math.random() * 100000));
+      emitPicture('image_stream.jpg?_t=' + (Math.random() * 100000));
       setTimeout(reset,5000, io);
     })
     .catch((err) => {
         console.log('probably stopped, checking error');
         console.log(err instanceof RaspistillInterruptError); // true, raspistill was interrupted;
     });
+}
+
+function emitPicture(picturePath) {
+  console.log('Emit picture');
+  io.sockets.emit('picture', picturePath);
 }
 
 function reset(io) {
@@ -76,66 +90,50 @@ function countdown(io, count) {
   console.log('emit countDown ' + count);
   io.sockets.emit('countDown', count);
   if (count == 0) {
-    takePicture(io);
+    takeDslrPhoto2();
   } else {
     setTimeout(countdown,1000, io, count -1);
   }
 }
 
 button.watch(function(err, value) {
+console.log('button ' + value)
   led.writeSync(value);
+  if(value == 0 && !isTakingPicture) {
+    isTakingPicture  = true;
+    countdown(io, 2); //2 sec countdown
+  }
 });
 
-function testgPhoto() {
-console.log('testing gPhoto');
-// List cameras / assign list item to variable to use below options
-GPhoto.list(function (list) {
-  console.log('list length ' + list.length);
-  if (list.length === 0) return;
-  var camera = list[0];
-  console.log('Found', camera.model);
-
-  // get configuration tree
-  camera.getConfig(function (er, settings) {
-    console.log(settings);
+function takeDslrPhoto() {
+  console.log('taking DSLR Picture...');
+  dslr.takePicture({
+    targetPath: '/tmp/photoBooth.XXXXXX'
+  }, function (er, tmpname) {
+    console.log('took DSLR Picture...' + er);
+    fs.renameSync(tmpname, __dirname + '/stream/' + createPictureName());
+    console.log('wrote Picture...');
+    isTakingPicture = false;
   });
+}
 
-  // Set configuration values
-  camera.setConfigValue('capturetarget', 1, function (er) {
-    //...
-  });
-
+function takeDslrPhoto2() {
+  console.log('taking DSLR Picture2...');
   // Take picture with camera object obtained from list()
-  camera.takePicture({download: true}, function (er, data) {
-    fs.writeFileSync(__dirname + '/picture.jpg', data);
+  dslr.takePicture({download: true}, function (er, data) {
+    console.log('took DSLR Picture2...' + er);
+    var pictureName = createPictureName();
+    fs.writeFileSync(__dirname + '/stream/' + pictureName, data);
+    console.log('wrote Picture2...');
+    emitPicture(pictureName);
+    isTakingPicture = false;
   });
+}
 
-  // Take picture without downloading immediately
-  camera.takePicture({download: false}, function (er, path) {
-    console.log(path);
-  });
+function createPictureName() {
+  return 'picture_' + (new Date()).getTime() + '.jpg';
+}
 
-  // Take picture and download it to filesystem
-  camera.takePicture({
-    targetPath: '/tmp/foo.XXXXXX'
-  }, function (er, tmpname) {
-    fs.renameSync(tmpname, __dirname + '/picture.jpg');
-  });
-
-  // Download a picture from camera
-  camera.downloadPicture({
-    cameraPath: '/store_00020001/DCIM/100CANON/IMG_1231.JPG',
-    targetPath: '/tmp/foo.XXXXXX'
-  }, function (er, tmpname) {
-    fs.renameSync(tmpname, __dirname + '/picture.jpg');
-  });
-
-  // Get preview picture (from AF Sensor, fails silently if unsupported)
-  camera.takePicture({
-    preview: true,
-    targetPath: '/tmp/foo.XXXXXX'
-  }, function (er, tmpname) {
-    fs.renameSync(tmpname, __dirname + '/picture.jpg');
-  });
-});
+function createPicturePath() {
+  return '/stream/picture_' + (new Date()).getTime() + '.jpg';
 }

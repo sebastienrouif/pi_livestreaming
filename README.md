@@ -35,7 +35,22 @@ nano /etc/network/interfaces
 Socket.io android client
  https://github.com/nkzawa/socket.io-android-chat
 
+Disable gphoto2 from automatically mounting the camera :
+in /usr/lib/gvfs/ rename gvfsd-gphoto2 and gvfs-gphoto2-volume-monitor
+
 
  Push button
  http://www.arduinoclassroom.com/index.php/arduino-101/chapter-4a 
  https://github.com/androidthings/sample-button
+
+5. Make it run on boot
+
+This is the hardest part if you don't really know what you're doing.
+
+You can define things to run on boot in /etc/rc.local. In that shell script, you don't have the same path as when you log in, so just running node app.js won't do the trick.
+
+I tried a lot of different things that all gave errors like Illegal instruction or Permission denied or File not found.
+
+What does work, is running one command as the default pi user. Because that user does have node in his path, the command is known.
+
+su pi -c 'node /home/pi/server.js < /dev/null &'
