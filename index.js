@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
+
 var io = require('socket.io')(http);
 var path = require('path');
 var Raspistill = require('node-raspistill').Raspistill;
@@ -112,6 +113,9 @@ function takeDslrPhoto() {
   }, function (er, tmpname) {
     console.log('took DSLR Picture...' + er);
     fs.renameSync(tmpname, __dirname + '/stream/' + createPictureName());
+
+// TODO : upload fb here
+
     console.log('wrote Picture...');
     isTakingPicture = false;
   });
