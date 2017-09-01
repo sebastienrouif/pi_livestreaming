@@ -2,6 +2,17 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 
+// fb
+var FB = require('fb'),
+    fb = new FB.Facebook();
+FB.setAccessToken('EAACEdEose0cBALwXnESFStSPIrNhZAJL04s19rQiDZCUmveMv80Ah5nQONxzqk9tSu6ZBtSgK2tyEmk3f0ZBPsk7L9bn7JGNsV6GMqxnMywt6z5PTwn96SRH4EFJvEiPqgby2pk0LhDDvl5UZCxlwpeb1i1fpYmNZBrHffZBmZCHyise3g1xixZA757P9rxC8ZCiewZBRmA9GTSi6CPBqJVgIznpJJLIJZCkUDcZD');
+var event_wedding_id : 1219917591379215,
+    album_wedding_id : 114810819202282,
+    group_wedding_id : 114809552535742;
+
+// image resizer
+import sharp from 'sharp';
+
 var io = require('socket.io')(http);
 var path = require('path');
 var Raspistill = require('node-raspistill').Raspistill;
@@ -106,18 +117,30 @@ console.log('button ' + value)
   }
 });
 
+
+// DEPRECATED
 function takeDslrPhoto() {
   console.log('taking DSLR Picture...');
   dslr.takePicture({
     targetPath: '/tmp/photoBooth.XXXXXX'
   }, function (er, tmpname) {
     console.log('took DSLR Picture...' + er);
-    fs.renameSync(tmpname, __dirname + '/stream/' + createPictureName());
-
-// TODO : upload fb here
-
+    var newName = __dirname + '/stream/' + createPictureName();
+    fs.renameSync(tmpname, newName);
     console.log('wrote Picture...');
+    uploadPicToFb(newName);
     isTakingPicture = false;
+  });
+}
+
+
+function uploadPicToFb(picPath){
+  FB.api(album_wedding_id+'/photos', 'post', { source: fs.createReadStream(picPath), caption: '' }, function (res) {
+    if(!res || res.error) {
+      console.log(!res ? 'error occurred' : res.error);
+      return;
+    }
+    console.log('Post Id: ' + res.post_id);
   });
 }
 
@@ -127,9 +150,21 @@ function takeDslrPhoto2() {
   dslr.takePicture({download: true}, function (er, data) {
     console.log('took DSLR Picture2...' + er);
     var pictureName = createPictureName();
-    fs.writeFileSync(__dirname + '/stream/' + pictureName, data);
+    var picPath = __dirname + '/stream/' + pictureName ;
+    var sdPicPath = __dirname + '/stream/sd_' + pictureName
+    fs.writeFileSync(picPath, data);
     console.log('wrote Picture2...');
-    emitPicture(pictureName);
+
+
+    sharp(data)
+      .resize(1054, 703)
+      .toFile(sdPicPath, (err, info) => {
+        console.log('error while resizing pic');
+      });
+
+
+    emitPicture(sdPicPath);
+    uploadPicToFb(__dirname + '/stream/sd_' + pictureName);
     isTakingPicture = false;
   });
 }

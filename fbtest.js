@@ -7,8 +7,8 @@ var fs = require('fs');
 
 
 var event_wedding_id : 1219917591379215,
-    album_wedding_id : 123,
-    group_wedding_id : 456;
+    album_wedding_id : 114810819202282,
+    group_wedding_id : 114809552535742;
 
 
 
@@ -24,14 +24,14 @@ FB.api('1219917591379215/feed', 'post', { message: body }, function (res) {
 
 
 
-//
-// FB.api('333116043778666/photos', 'post', { source: fs.createReadStream('pics/IMG_20170831_121718_020.jpg'), caption: 'It\'s happening =)' }, function (res) {
-//   if(!res || res.error) {
-//     console.log(!res ? 'error occurred' : res.error);
-//     return;
-//   }
-//   console.log('Post Id: ' + res.post_id);
-// });
+
+FB.api('333116043778666/photos', 'post', { source: fs.createReadStream('pics/IMG_20170831_121718_020.jpg'), caption: 'It\'s happening =)' }, function (res) {
+  if(!res || res.error) {
+    console.log(!res ? 'error occurred' : res.error);
+    return;
+  }
+  console.log('Post Id: ' + res.post_id);
+});
 
 // FB.api('me/photos', 'post', { source: { value: photoBuffer, options: { contentType: 'image/jpeg' } }, caption: 'It\'s happening =)' }, function (res) {
 //   if(!res || res.error) {
