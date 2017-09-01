@@ -118,25 +118,9 @@ console.log('button ' + value)
 });
 
 
-// DEPRECATED
-function takeDslrPhoto() {
-  console.log('taking DSLR Picture...');
-  dslr.takePicture({
-    targetPath: '/tmp/photoBooth.XXXXXX'
-  }, function (er, tmpname) {
-    console.log('took DSLR Picture...' + er);
-    var newName = __dirname + '/stream/' + createPictureName();
-    fs.renameSync(tmpname, newName);
-    console.log('wrote Picture...');
-    uploadPicToFb(newName);
-    isTakingPicture = false;
-  });
-}
-
-
 function uploadPicToFb(picPath){
   console.log('gonna upload pic..');
-  FB.api(album_wedding_id+'/photos', 'post', { source: 'picture_1504273329094.jpg', caption: '' }, function (res) {
+  FB.api(album_wedding_id+'/photos', 'post', { source: 'picture_1504273329094.jpg', caption: 'test' }, function (res) {
     if(!res || res.error) {
       console.log(!res ? 'error occurred' : res.error);
       return;
