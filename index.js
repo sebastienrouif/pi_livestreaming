@@ -151,7 +151,7 @@ function takeDslrPhoto2() {
     console.log('took DSLR Picture2...' + er);
     var pictureName = createPictureName();
     var picPath = __dirname + '/stream/' + pictureName ;
-    var sdPicPath = __dirname + '/stream/sd_' + pictureName
+    var sdPicPath = __dirname + '/stream/sd_' + pictureName;
     fs.writeFileSync(picPath, data);
     console.log('wrote Picture2...');
 
@@ -163,7 +163,7 @@ function takeDslrPhoto2() {
       });
 
 
-    emitPicture(sdPicPath);
+    emitPicture('sd_'+pictureName);
     uploadPicToFb(__dirname + '/stream/sd_' + pictureName);
     isTakingPicture = false;
   });
