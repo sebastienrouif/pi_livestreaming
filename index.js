@@ -6,12 +6,12 @@ var http = require('http').Server(app);
 var FB = require('fb'),
     fb = new FB.Facebook();
 FB.setAccessToken('EAACEdEose0cBALwXnESFStSPIrNhZAJL04s19rQiDZCUmveMv80Ah5nQONxzqk9tSu6ZBtSgK2tyEmk3f0ZBPsk7L9bn7JGNsV6GMqxnMywt6z5PTwn96SRH4EFJvEiPqgby2pk0LhDDvl5UZCxlwpeb1i1fpYmNZBrHffZBmZCHyise3g1xixZA757P9rxC8ZCiewZBRmA9GTSi6CPBqJVgIznpJJLIJZCkUDcZD');
-var event_wedding_id : 1219917591379215,
-    album_wedding_id : 114810819202282,
-    group_wedding_id : 114809552535742;
+var event_wedding_id = 1219917591379215,
+    album_wedding_id = 114810819202282,
+    group_wedding_id = 114809552535742;
 
 // image resizer
-import sharp from 'sharp';
+
 
 var io = require('socket.io')(http);
 var path = require('path');
@@ -135,12 +135,13 @@ function takeDslrPhoto() {
 
 
 function uploadPicToFb(picPath){
-  FB.api(album_wedding_id+'/photos', 'post', { source: fs.createReadStream(picPath), caption: '' }, function (res) {
+  console.log('gonna upload pic..');
+  FB.api(album_wedding_id+'/photos', 'post', { source: 'picture_1504273329094.jpg', caption: '' }, function (res) {
     if(!res || res.error) {
       console.log(!res ? 'error occurred' : res.error);
       return;
     }
-    console.log('Post Id: ' + res.post_id);
+    console.log('pic successfully uploqded to fb. Id: ' + res.post_id);
   });
 }
 
@@ -156,15 +157,10 @@ function takeDslrPhoto2() {
     console.log('wrote Picture2...');
 
 
-    sharp(data)
-      .resize(1054, 703)
-      .toFile(sdPicPath, (err, info) => {
-        console.log('error while resizing pic');
-      });
 
 
-    emitPicture('sd_'+pictureName);
-    uploadPicToFb(__dirname + '/stream/sd_' + pictureName);
+    emitPicture(pictureName);
+    uploadPicToFb(__dirname + '/stream/' + pictureName);
     isTakingPicture = false;
   });
 }
