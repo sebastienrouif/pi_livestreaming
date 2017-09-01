@@ -5,7 +5,7 @@ var http = require('http').Server(app);
 // fb
 var FB = require('fb'),
     fb = new FB.Facebook();
-FB.setAccessToken('EAACEdEose0cBAI4yRLpZCySAOcZAZAJMc9xBjDWZBbFpWfb3UY1c6Ede3r9A6nbgRER4jLL4epeSwTX0iZBTO0uMeAJJR1WZCOIDnb13zx3tcEgZAyh9JZCjLXYKmKhlwhe3KPGK7N89uu8VrJzNZBJAsZBnt2uEri7oRm1wqJfaSu3NLdcNrvfPoZBYMViN3wGMfLUIGHZCFzKfCOBrs3DwznO9ldDiKJRZAWsUZD');
+FB.setAccessToken('EAACEdEose0cBAJPZB5r6XkZASsolqZBpNUUKuLEXjQpR6i5eISoi4SkhzPTZAqHC8OnIL7k8yiw9RJtXCcVdoNTeWPelpnud7P4LB75ZCxS8Y9kA8WqIZAuyNjbg6OOQNpEmolo5X2ecWEVmkbx50rvdS6TJMW1E7BxJroivzoWDUiI4bVvGnZCNVDZCVpzv6nU67WjZBq6MYAAZDZD');
 var event_wedding_id = 1219917591379215,
     album_wedding_id = 114810819202282,
     group_wedding_id = 114809552535742;
